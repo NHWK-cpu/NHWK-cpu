@@ -4,7 +4,7 @@
 
 - 🌱 I’m currently learning **Web Development,WPU**
 
-- ⚡ Fun fact **i'm member of IMPHEN**
+- ⚡ Fun fact **i'm member of IMPHNEN**
 
 <h3 align="left">Connect with me:</h3>
 <p align="left">
