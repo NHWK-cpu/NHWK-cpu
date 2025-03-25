@@ -16,11 +16,11 @@ _An **IT Entusiast** with interest in **Web Development**_
 
 - ⚡ Build a website with **React**, **HTML**, **CSS**, **Javascript**, and **Django**
 
-- Make a simple game with **Unity**
+- 🎮 Make a simple game with **Unity**
 
-- Colaborate with **Git**
+- 🤝 Colaborate with **Git**
 
-- Design a website or app with **Figma**
+- 🎨 Design a website or app with **Figma**
 
 <h3 align="left">Connect with me:</h3>
 <p align="left">
