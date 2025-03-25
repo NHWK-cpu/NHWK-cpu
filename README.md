@@ -1,4 +1,4 @@
-<h3>Hello World 👋, i'm Hafizh Ammar M</h3>
+<h2>Hello World 👋, i'm Hafizh Ammar M</h2>
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=nhwk-cpu&label=Profile%20views&color=0e75b6&style=flat" alt="nhwk-cpu" /> </p>
 
