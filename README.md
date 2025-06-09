@@ -28,4 +28,4 @@ _An **IT Entusiast** with interest in **Web Development**_
 <a href="https://instagram.com/hafizh_komputer" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/instagram.svg" alt="hafizh_komputer" height="30" width="40" /></a>
 </p>
 
-<img src=src/bawah.png width="350"/>
+<img src=src/bawah.png width="35%"/>
