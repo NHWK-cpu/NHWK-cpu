@@ -6,27 +6,7 @@ _An **IT Entusiast** with interest in **Web Development**_
 
 <h4>What can i do?</h4>
 
-<div>
-  <a href="https://twitter.com/intent/tweet?via=marktextme&url=https://github.com/marktext/marktext/&text=What%20do%20you%20want%20to%20say%20to%20app?&hashtags=happyMarkText">
-    <img src="https://img.shields.io/badge/Make%20a%20website-gray?style=for-the-badge&logo=javascript
-    " alt="web">
-  </a>
-  
-  <a href="https://twitter.com/intent/tweet?via=marktextme&url=https://github.com/marktext/marktext/&text=What%20do%20you%20want%20to%20say%20to%20app?&hashtags=happyMarkText">
-    <img src="https://img.shields.io/badge/create%20autonomus%20program-gray?style=for-the-badge&logo=python
-    " alt="program">
-  </a>
-  
-  <a href="https://twitter.com/intent/tweet?via=marktextme&url=https://github.com/marktext/marktext/&text=What%20do%20you%20want%20to%20say%20to%20app?&hashtags=happyMarkText">
-    <img src="https://img.shields.io/badge/make%20indie%20game-gray?style=for-the-badge&logo=unity
-    " alt="program">
-  </a>
-
-  <a href="https://twitter.com/intent/tweet?via=marktextme&url=https://github.com/marktext/marktext/&text=What%20do%20you%20want%20to%20say%20to%20app?&hashtags=happyMarkText">
-    <img src="https://img.shields.io/badge/design%20app-gray?style=for-the-badge&logo=figma&logoColor=lightblue
-    " alt="program">
-  </a>
-</div>
+![Static Badge](https://img.shields.io/badge/make%20a%20website-gray?style=for-the-badge&logo=javascript) ![Static Badge](https://img.shields.io/badge/create%20autonomus%20program-gray?style=for-the-badge&logo=python) ![Static Badge](https://img.shields.io/badge/make%20indie%20game-gray?style=for-the-badge&logo=unity) ![Static Badge](https://img.shields.io/badge/design%20app-gray?style=for-the-badge&logo=figma&logoColor=lightblue)
 
 <a href="#" target="_blank" rel="noreferrer"></a>
 
