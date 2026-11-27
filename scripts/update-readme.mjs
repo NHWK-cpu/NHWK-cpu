@@ -9,10 +9,25 @@ const headers = {
   ...(TOKEN && { Authorization: `Bearer ${TOKEN}` }),
 };
 
-// Font di dalam SVG <img> hanya bisa memakai font yang terpasang di perangkat
-// pengunjung. JetBrains Mono dipakai jika terpasang, selain itu Segoe UI,
-// lalu sans-serif sebagai cadangan terakhir.
-const FONT = "'JetBrains Mono', 'Segoe UI', sans-serif";
+// ---------- Pengaturan tampilan ----------
+// Lebar total tiap kartu (px). Kartu TIDAK diperkecil selama layar cukup lebar.
+// Kalau di HP kecil kartu masih terlihat mengecil, turunkan angka ini (mis. 300).
+const CARD_W = 320;
+const CARD_H = 176;
+const GAP = 4; // ruang transparan di sekeliling kartu = jarak antar kartu
+const PAD = 16; // padding isi kartu
+
+// Satu daftar font untuk SEMUA teks. Browser memakai yang pertama yang terpasang.
+// Nama "Nerd Font"/"NL" ditambahkan karena JetBrains Mono sering terpasang
+// dengan nama keluarga tersebut (mis. di Linux).
+const FONT =
+  "JetBrains Mono, JetBrainsMono Nerd Font, JetBrains Mono NL, Segoe UI, sans-serif";
+
+// Estimasi lebar karakter JetBrains Mono ≈ 0.6 × ukuran font (14px ≈ 8.4px).
+const DESC_MAX = 32; // karakter per baris deskripsi
+const DESC_LINES = 3;
+const TITLE_MAX = 28;
+const LANG_MAX = 10;
 
 const LANG_COLORS = {
   Go: "#00ADD8",
@@ -27,6 +42,7 @@ const LANG_COLORS = {
   HTML: "#e34c26",
   CSS: "#563d7c",
 };
+const LANG_LABELS = { "Visual Basic .NET": "VB.NET" };
 
 const esc = (s = "") =>
   s.replace(
@@ -36,6 +52,9 @@ const esc = (s = "") =>
         c
       ],
   );
+
+const md5 = (s) => createHash("md5").update(s).digest("hex");
+const cut = (s, max) => (s.length > max ? s.slice(0, max - 1) + "…" : s);
 
 async function getFinishedRepos() {
   const repos = [];
@@ -57,25 +76,33 @@ async function getFinishedRepos() {
 function timeAgo(iso) {
   const sec = (Date.now() - new Date(iso)) / 1000;
   const units = [
-    ["tahun", 31536000],
-    ["bulan", 2592000],
-    ["minggu", 604800],
+    ["thn", 31536000],
+    ["bln", 2592000],
+    ["mgg", 604800],
     ["hari", 86400],
     ["jam", 3600],
-    ["menit", 60],
+    ["mnt", 60],
   ];
   for (const [name, size] of units) {
-    if (sec >= size) return `${Math.floor(sec / size)} ${name} yang lalu`;
+    if (sec >= size) return `${Math.floor(sec / size)} ${name} lalu`;
   }
   return "baru saja";
 }
 
-// Lebar 46 karakter cocok untuk JetBrains Mono (lebih lebar dari Segoe UI).
-function wrap(text, max = 46, maxLines = 2) {
+function wrap(text, max, maxLines) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines = [];
   let line = "";
-  for (const w of words) {
+  for (let w of words) {
+    // pecah kata yang lebih panjang dari satu baris (mis. URL)
+    while (w.length > max) {
+      if (line) {
+        lines.push(line);
+        line = "";
+      }
+      lines.push(w.slice(0, max));
+      w = w.slice(max);
+    }
     if (line && (line + " " + w).length > max) {
       lines.push(line);
       line = w;
@@ -84,77 +111,92 @@ function wrap(text, max = 46, maxLines = 2) {
     }
   }
   if (line) lines.push(line);
-  return lines
-    .slice(0, maxLines)
-    .map((l, i) =>
-      i === maxLines - 1 && lines.length > maxLines
-        ? l.slice(0, max - 1) + "…"
-        : l,
-    );
+  if (lines.length <= maxLines) return lines;
+  const out = lines.slice(0, maxLines);
+  out[maxLines - 1] = out[maxLines - 1].slice(0, max - 1).trimEnd() + "…";
+  return out;
 }
 
+// Hue 0-359 yang acak tetapi STABIL: dihitung dari nama repo, jadi warna tiap
+// kartu berbeda-beda namun tidak berubah setiap workflow berjalan.
+const hueOf = (name) => parseInt(md5(name).slice(0, 6), 16) % 360;
+
 function card(r) {
+  const h = hueOf(r.name);
   const lang = r.language ?? "Other";
-  const color = LANG_COLORS[lang] ?? "#8b949e";
-  const title = r.name.length > 36 ? r.name.slice(0, 35) + "…" : r.name;
-  const descSvg = wrap(r.description ?? "")
+  const langLabel = cut(LANG_LABELS[lang] ?? lang, LANG_MAX);
+  const dot = LANG_COLORS[lang] ?? `hsl(${h}, 60%, 55%)`;
+  const title = cut(r.name, TITLE_MAX);
+  const desc = wrap(
+    r.description?.trim() || "Belum ada deskripsi.",
+    DESC_MAX,
+    DESC_LINES,
+  );
+
+  const x = GAP + PAD;
+  const right = CARD_W - GAP - PAD;
+  const descSvg = desc
     .map(
       (l, i) =>
-        `<text class="desc" x="16" y="${58 + i * 19}" font-size="13">${esc(l)}</text>`,
+        `<text class="desc" x="${x}" y="${64 + i * 20}" font-family="${FONT}" font-size="14">${esc(l)}</text>`,
     )
     .join("\n  ");
 
-  // Warna mengikuti preferensi tema browser/OS pengunjung lewat
-  // @media (prefers-color-scheme). Di dalam <img>, SVG tidak bisa membaca
-  // CSS dari halaman GitHub, jadi aturan ini ditaruh di dalam SVG itu sendiri.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="140" viewBox="0 0 400 140">
+  // Warna mengikuti tema browser/OS pengunjung via prefers-color-scheme.
+  // Semua teks memakai font yang sama (diset di root, di CSS, dan per elemen).
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}" font-family="${FONT}">
   <style>
-    text { font-family: ${FONT}; }
-    .bg { fill: #ffffff; stroke: #d1d9e0; }
-    .title { fill: #0969da; font-weight: 600; }
-    .desc { fill: #475569; }
-    .lang { fill: #1f2328; }
-    .meta { fill: #656d76; }
-    .sep { stroke: #d8dee4; }
+    svg, text, tspan { font-family: ${FONT}; }
+    text { font-size: 14px; }
+    .bg { fill: hsl(${h}, 60%, 97%); stroke: hsl(${h}, 45%, 78%); stroke-width: 1.5; }
+    .title { fill: hsl(${h}, 75%, 34%); font-size: 16px; font-weight: 700; }
+    .desc { fill: hsl(${h}, 12%, 28%); }
+    .lang { fill: hsl(${h}, 15%, 18%); }
+    .meta { fill: hsl(${h}, 10%, 36%); }
+    .sep { stroke: hsl(${h}, 35%, 85%); }
     @media (prefers-color-scheme: dark) {
-      .bg { fill: #161b22; stroke: #30363d; }
-      .title { fill: #58a6ff; }
-      .desc { fill: #b1bac4; }
-      .lang { fill: #c9d1d9; }
-      .meta { fill: #8b949e; }
-      .sep { stroke: #21262d; }
+      .bg { fill: hsl(${h}, 28%, 12%); stroke: hsl(${h}, 40%, 32%); }
+      .title { fill: hsl(${h}, 90%, 72%); }
+      .desc { fill: hsl(${h}, 15%, 80%); }
+      .lang { fill: hsl(${h}, 15%, 88%); }
+      .meta { fill: hsl(${h}, 12%, 68%); }
+      .sep { stroke: hsl(${h}, 25%, 24%); }
     }
   </style>
-  <rect class="bg" x="0.5" y="0.5" width="399" height="139" rx="12"/>
-  <text class="title" x="16" y="32" font-size="15">${esc(title)}</text>
+  <rect class="bg" x="${GAP}" y="${GAP}" width="${CARD_W - GAP * 2}" height="${CARD_H - GAP * 2}" rx="12"/>
+  <text class="title" x="${x}" y="36" font-family="${FONT}" font-size="16">${esc(title)}</text>
   ${descSvg}
-  <line class="sep" x1="16" y1="104" x2="384" y2="104"/>
-  <circle cx="21" cy="122" r="5" fill="${color}"/>
-  <text class="lang" x="32" y="126" font-size="12">${esc(lang)}</text>
-  <text class="meta" x="384" y="126" font-size="12" text-anchor="end">Last commit ${timeAgo(r.pushed_at)}</text>
+  <line class="sep" x1="${x}" y1="124" x2="${right}" y2="124"/>
+  <circle cx="${x + 5}" cy="145" r="5" fill="${dot}"/>
+  <text class="lang" x="${x + 18}" y="150" font-family="${FONT}" font-size="14">${esc(langLabel)}</text>
+  <text class="meta" x="${right}" y="150" font-family="${FONT}" font-size="14" text-anchor="end">Commit ${timeAgo(r.pushed_at)}</text>
 </svg>`;
 }
 
 const repos = await getFinishedRepos();
+console.log(
+  "Repo finished:",
+  repos.map((r) => `${r.name} [${r.topics.join(", ")}]`),
+);
 mkdirSync("assets/cards", { recursive: true });
 
-// Tulis setiap kartu sekali, sekaligus hitung hash untuk cache-busting.
+// Tulis tiap kartu sekali, hitung hash untuk cache-busting.
 const versions = {};
 for (const r of repos) {
   const svg = card(r);
   writeFileSync(`assets/cards/${r.name}.svg`, svg);
-  versions[r.name] = createHash("md5").update(svg).digest("hex").slice(0, 8);
+  versions[r.name] = md5(svg).slice(0, 8);
 }
 
-let rows = "";
-for (let i = 0; i < repos.length; i += 2) {
-  const a = repos[i],
-    b = repos[i + 1];
-  const td = (r) =>
-    `<td width="50%" valign="top"><a href="${r.html_url}"><img src="assets/cards/${r.name}.svg?v=${versions[r.name]}" alt="${esc(r.name)}"></a></td>`;
-  rows += `<tr>${td(a)}${b ? td(b) : "<td></td>"}</tr>\n`;
-}
-const block = `<!-- FINISHED:START -->\n<table>\n${rows}</table>\n<!-- FINISHED:END -->`;
+// Tanpa tabel: gambar inline akan otomatis turun ke baris berikutnya
+// saat lebar layar tidak cukup, dan ukurannya tetap CARD_W.
+const items = repos
+  .map(
+    (r) =>
+      `<a href="${r.html_url}"><img src="assets/cards/${r.name}.svg?v=${versions[r.name]}" width="${CARD_W}" alt="${esc(r.name)}"></a>`,
+  )
+  .join("\n");
+const block = `<!-- FINISHED:START -->\n<div align="center">\n${items}\n</div>\n<!-- FINISHED:END -->`;
 
 const readme = readFileSync("README.md", "utf8");
 const pattern = /<!-- FINISHED:START -->[\s\S]*?<!-- FINISHED:END -->/;
