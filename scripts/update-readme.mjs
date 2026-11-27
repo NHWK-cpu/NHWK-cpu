@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { createHash } from "node:crypto";
 
 const USER = "NHWK-cpu";
 const TOPIC = "finished";
@@ -7,6 +8,11 @@ const headers = {
   Accept: "application/vnd.github+json",
   ...(TOKEN && { Authorization: `Bearer ${TOKEN}` }),
 };
+
+// Font di dalam SVG <img> hanya bisa memakai font yang terpasang di perangkat
+// pengunjung. JetBrains Mono dipakai jika terpasang, selain itu Segoe UI,
+// lalu sans-serif sebagai cadangan terakhir.
+const FONT = "'JetBrains Mono', 'Segoe UI', sans-serif";
 
 const LANG_COLORS = {
   Go: "#00ADD8",
@@ -64,22 +70,23 @@ function timeAgo(iso) {
   return "baru saja";
 }
 
-function wrap(text, max = 60, maxLines = 2) {
-  const words = text.split(/\s+/);
+// Lebar 46 karakter cocok untuk JetBrains Mono (lebih lebar dari Segoe UI).
+function wrap(text, max = 46, maxLines = 2) {
+  const words = text.split(/\s+/).filter(Boolean);
   const lines = [];
   let line = "";
   for (const w of words) {
-    if ((line + " " + w).trim().length > max) {
+    if (line && (line + " " + w).length > max) {
       lines.push(line);
       line = w;
     } else {
-      line = (line + " " + w).trim();
+      line = line ? line + " " + w : w;
     }
   }
   if (line) lines.push(line);
   return lines
     .slice(0, maxLines)
-    .map((l, i, arr) =>
+    .map((l, i) =>
       i === maxLines - 1 && lines.length > maxLines
         ? l.slice(0, max - 1) + "…"
         : l,
@@ -89,36 +96,62 @@ function wrap(text, max = 60, maxLines = 2) {
 function card(r) {
   const lang = r.language ?? "Other";
   const color = LANG_COLORS[lang] ?? "#8b949e";
-  const descLines = wrap(r.description ?? "");
-  const descSvg = descLines
+  const title = r.name.length > 36 ? r.name.slice(0, 35) + "…" : r.name;
+  const descSvg = wrap(r.description ?? "")
     .map(
       (l, i) =>
-        `<text x="16" y="${58 + i * 19}" font-size="13.5" fill="#b1bac4">${esc(l)}</text>`,
+        `<text class="desc" x="16" y="${58 + i * 19}" font-size="13">${esc(l)}</text>`,
     )
     .join("\n  ");
 
+  // Warna mengikuti preferensi tema browser/OS pengunjung lewat
+  // @media (prefers-color-scheme). Di dalam <img>, SVG tidak bisa membaca
+  // CSS dari halaman GitHub, jadi aturan ini ditaruh di dalam SVG itu sendiri.
   return `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="140" viewBox="0 0 400 140">
-  <rect x="0.5" y="0.5" width="399" height="139" rx="12" fill="#161b22" stroke="#30363d"/>
-  <text x="16" y="32" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15.5" font-weight="600" fill="#58a6ff">${esc(r.name)}</text>
+  <style>
+    text { font-family: ${FONT}; }
+    .bg { fill: #ffffff; stroke: #d1d9e0; }
+    .title { fill: #0969da; font-weight: 600; }
+    .desc { fill: #475569; }
+    .lang { fill: #1f2328; }
+    .meta { fill: #656d76; }
+    .sep { stroke: #d8dee4; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #161b22; stroke: #30363d; }
+      .title { fill: #58a6ff; }
+      .desc { fill: #b1bac4; }
+      .lang { fill: #c9d1d9; }
+      .meta { fill: #8b949e; }
+      .sep { stroke: #21262d; }
+    }
+  </style>
+  <rect class="bg" x="0.5" y="0.5" width="399" height="139" rx="12"/>
+  <text class="title" x="16" y="32" font-size="15">${esc(title)}</text>
   ${descSvg}
-  <line x1="16" y1="104" x2="384" y2="104" stroke="#21262d"/>
+  <line class="sep" x1="16" y1="104" x2="384" y2="104"/>
   <circle cx="21" cy="122" r="5" fill="${color}"/>
-  <text x="32" y="126" font-size="12" fill="#c9d1d9">${esc(lang)}</text>
-  <text x="384" y="126" font-size="12" fill="#8b949e" text-anchor="end">Last commit ${timeAgo(r.pushed_at)}</text>
+  <text class="lang" x="32" y="126" font-size="12">${esc(lang)}</text>
+  <text class="meta" x="384" y="126" font-size="12" text-anchor="end">Last commit ${timeAgo(r.pushed_at)}</text>
 </svg>`;
 }
 
 const repos = await getFinishedRepos();
 mkdirSync("assets/cards", { recursive: true });
-for (const r of repos) writeFileSync(`assets/cards/${r.name}.svg`, card(r));
 
-// Susun dua kartu per baris
+// Tulis setiap kartu sekali, sekaligus hitung hash untuk cache-busting.
+const versions = {};
+for (const r of repos) {
+  const svg = card(r);
+  writeFileSync(`assets/cards/${r.name}.svg`, svg);
+  versions[r.name] = createHash("md5").update(svg).digest("hex").slice(0, 8);
+}
+
 let rows = "";
 for (let i = 0; i < repos.length; i += 2) {
   const a = repos[i],
     b = repos[i + 1];
   const td = (r) =>
-    `<td width="50%" valign="top"><a href="${r.html_url}"><img src="assets/cards/${r.name}.svg" alt="${esc(r.name)}"></a></td>`;
+    `<td width="50%" valign="top"><a href="${r.html_url}"><img src="assets/cards/${r.name}.svg?v=${versions[r.name]}" alt="${esc(r.name)}"></a></td>`;
   rows += `<tr>${td(a)}${b ? td(b) : "<td></td>"}</tr>\n`;
 }
 const block = `<!-- FINISHED:START -->\n<table>\n${rows}</table>\n<!-- FINISHED:END -->`;
