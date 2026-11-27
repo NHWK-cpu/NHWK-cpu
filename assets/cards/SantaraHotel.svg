@@ -1,9 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="140" viewBox="0 0 400 140">
-  <rect x="0.5" y="0.5" width="399" height="139" rx="12" fill="#161b22" stroke="#30363d"/>
-  <text x="16" y="32" font-family="Segoe UI,Helvetica,Arial,sans-serif" font-size="15.5" font-weight="600" fill="#58a6ff">SantaraHotel</text>
-  <text x="16" y="58" font-size="13.5" fill="#b1bac4">Hotel Management Desktop App</text>
-  <line x1="16" y1="104" x2="384" y2="104" stroke="#21262d"/>
+  <style>
+    text { font-family: 'JetBrains Mono', 'Segoe UI', sans-serif; }
+    .bg { fill: #ffffff; stroke: #d1d9e0; }
+    .title { fill: #0969da; font-weight: 600; }
+    .desc { fill: #475569; }
+    .lang { fill: #1f2328; }
+    .meta { fill: #656d76; }
+    .sep { stroke: #d8dee4; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #161b22; stroke: #30363d; }
+      .title { fill: #58a6ff; }
+      .desc { fill: #b1bac4; }
+      .lang { fill: #c9d1d9; }
+      .meta { fill: #8b949e; }
+      .sep { stroke: #21262d; }
+    }
+  </style>
+  <rect class="bg" x="0.5" y="0.5" width="399" height="139" rx="12"/>
+  <text class="title" x="16" y="32" font-size="15">SantaraHotel</text>
+  <text class="desc" x="16" y="58" font-size="13">Hotel Management Desktop App</text>
+  <line class="sep" x1="16" y1="104" x2="384" y2="104"/>
   <circle cx="21" cy="122" r="5" fill="#b07219"/>
-  <text x="32" y="126" font-size="12" fill="#c9d1d9">Java</text>
-  <text x="384" y="126" font-size="12" fill="#8b949e" text-anchor="end">Last commit 1 tahun yang lalu</text>
+  <text class="lang" x="32" y="126" font-size="12">Java</text>
+  <text class="meta" x="384" y="126" font-size="12" text-anchor="end">Last commit 1 tahun yang lalu</text>
 </svg>
