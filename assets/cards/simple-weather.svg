@@ -1,27 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="140" viewBox="0 0 400 140">
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="176" viewBox="0 0 320 176" font-family="JetBrains Mono, JetBrainsMono Nerd Font, JetBrains Mono NL, Segoe UI, sans-serif">
   <style>
-    text { font-family: 'JetBrains Mono', 'Segoe UI', sans-serif; }
-    .bg { fill: #ffffff; stroke: #d1d9e0; }
-    .title { fill: #0969da; font-weight: 600; }
-    .desc { fill: #475569; }
-    .lang { fill: #1f2328; }
-    .meta { fill: #656d76; }
-    .sep { stroke: #d8dee4; }
+    svg, text, tspan { font-family: JetBrains Mono, JetBrainsMono Nerd Font, JetBrains Mono NL, Segoe UI, sans-serif; }
+    text { font-size: 14px; }
+    .bg { fill: hsl(295, 60%, 97%); stroke: hsl(295, 45%, 78%); stroke-width: 1.5; }
+    .title { fill: hsl(295, 75%, 34%); font-size: 16px; font-weight: 700; }
+    .desc { fill: hsl(295, 12%, 28%); }
+    .lang { fill: hsl(295, 15%, 18%); }
+    .meta { fill: hsl(295, 10%, 36%); }
+    .sep { stroke: hsl(295, 35%, 85%); }
     @media (prefers-color-scheme: dark) {
-      .bg { fill: #161b22; stroke: #30363d; }
-      .title { fill: #58a6ff; }
-      .desc { fill: #b1bac4; }
-      .lang { fill: #c9d1d9; }
-      .meta { fill: #8b949e; }
-      .sep { stroke: #21262d; }
+      .bg { fill: hsl(295, 28%, 12%); stroke: hsl(295, 40%, 32%); }
+      .title { fill: hsl(295, 90%, 72%); }
+      .desc { fill: hsl(295, 15%, 80%); }
+      .lang { fill: hsl(295, 15%, 88%); }
+      .meta { fill: hsl(295, 12%, 68%); }
+      .sep { stroke: hsl(295, 25%, 24%); }
     }
   </style>
-  <rect class="bg" x="0.5" y="0.5" width="399" height="139" rx="12"/>
-  <text class="title" x="16" y="32" font-size="15">simple-weather</text>
-  <text class="desc" x="16" y="58" font-size="13">simple weather check website using tailwind</text>
-  <text class="desc" x="16" y="77" font-size="13">css</text>
-  <line class="sep" x1="16" y1="104" x2="384" y2="104"/>
-  <circle cx="21" cy="122" r="5" fill="#e34c26"/>
-  <text class="lang" x="32" y="126" font-size="12">HTML</text>
-  <text class="meta" x="384" y="126" font-size="12" text-anchor="end">Last commit 1 tahun yang lalu</text>
+  <rect class="bg" x="4" y="4" width="312" height="168" rx="12"/>
+  <text class="title" x="20" y="36" font-family="JetBrains Mono, JetBrainsMono Nerd Font, JetBrains Mono NL, Segoe UI, sans-serif" font-size="16">simple-weather</text>
+  <text class="desc" x="20" y="64" font-family="JetBrains Mono, JetBrainsMono Nerd Font, JetBrains Mono NL, Segoe UI, sans-serif" font-size="14">simple weather check website</text>
+  <text class="desc" x="20" y="84" font-family="JetBrains Mono, JetBrainsMono Nerd Font, JetBrains Mono NL, Segoe UI, sans-serif" font-size="14">using tailwind css</text>
+  <line class="sep" x1="20" y1="124" x2="300" y2="124"/>
+  <circle cx="25" cy="145" r="5" fill="#e34c26"/>
+  <text class="lang" x="38" y="150" font-family="JetBrains Mono, JetBrainsMono Nerd Font, JetBrains Mono NL, Segoe UI, sans-serif" font-size="14">HTML</text>
+  <text class="meta" x="300" y="150" font-family="JetBrains Mono, JetBrainsMono Nerd Font, JetBrains Mono NL, Segoe UI, sans-serif" font-size="14" text-anchor="end">Commit 1 thn lalu</text>
 </svg>
